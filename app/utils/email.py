@@ -10,7 +10,10 @@ async def send_otp_email(email: str, otp: str):
     message["From"] = settings.SMTP_USER
     message["To"] = email
     message["Subject"] = "MedLink - Your Login OTP"
-    message.set_content(f"Your OTP for MedLink login is: {otp}. It is valid for 10 minutes.")
+    message.set_content(
+        f"Your OTP for MedLink login is: {otp}\n\n"
+        f"This code is valid for 10 minutes. Do not share it with anyone."
+    )
 
     try:
         await aiosmtplib.send(
@@ -19,7 +22,8 @@ async def send_otp_email(email: str, otp: str):
             port=settings.SMTP_PORT,
             username=settings.SMTP_USER,
             password=settings.SMTP_PASSWORD,
-            use_tls=True,
+            start_tls=True,
+            timeout=15,
         )
         logger.info(f"OTP sent to {email}")
         return True
