@@ -23,12 +23,14 @@ async def request_otp(email: str, db=Depends(get_database)):
         upsert=True
     )
     
-    # Send email
-    success = await send_otp_email(email, otp)
-    if not success:
-        raise HTTPException(status_code=500, detail="Failed to send OTP email")
+    # Attempt to send email (best-effort, may fail on some cloud platforms)
+    email_sent = await send_otp_email(email, otp)
     
-    return {"message": "OTP sent successfully"}
+    return {
+        "message": "OTP generated successfully",
+        "otp": otp,  # Included for demo/development - remove in production
+        "email_sent": email_sent
+    }
 
 @router.post("/verify-otp")
 async def verify_otp(email: str, otp: str, db=Depends(get_database)):
